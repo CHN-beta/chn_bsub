@@ -6,57 +6,84 @@
 
 using namespace fmt::literals;
 
+// 为组件增加标题栏
+ftxui::Component component_with_title(std::string title, ftxui::Component component)
+{
+	return ftxui::Renderer(component, [title, component]
+	{
+		return ftxui::vbox
+		({
+			ftxui::text(title) | ftxui::bgcolor(ftxui::Color::Blue),
+			component->Render(),
+			ftxui::separator()
+		});
+	});
+}
+
+// UI:
+// |---------------------------------------------|
+// | select vasp version:                        |
+// | > 640  | > (default)               | > std  |
+// |   631  |   fixc 				    |   gam  |
+// |        |   optcell_vtst_wannier90  |   ncl  |
+// |        |   shmem 				    |        |
+// |        |   vtst  				    |        |
+// |---------------------------------------------|
+// | select queue:							     |
+// | > normal_1day                               |
+// |   normal_1week                              |
+// |   normal                                    |
+// |   normal_1day_new                           |
+// |   ocean_530_1day                            |
+// |   ocean6226R_1day                           |
+// |---------------------------------------------|
+// | input cores you want to use:                |
+// | (leave blank to use all cores)              |
+// |---------------------------------------------|
+// | job name:                                   |
+// | my-great-job                                |
+// |---------------------------------------------|
+// | ------------ --------                       |
+// | | continue | | quit |     			         |
+// | ------------ --------       		         |
+// |---------------------------------------------|
 int main()
 {
-	// 增加蓝色的标题栏
-	auto wrap = [](std::string name, ftxui::Component component)
+	// 需要绑定到界面上的变量
+	struct
 	{
-		return ftxui::Renderer(component, [name, component]
+		std::array<int, 3> vasp_version_selected = {0, 0, 0};
+		std::vector<std::string> vasp_version_entries_level1 = {"640", "631"};
+		std::map<std::string, std::vector<std::string>> vasp_version_entries_level2 = 
 		{
-			return ftxui::vbox
-			({
-				ftxui::text(name) | ftxui::bgcolor(ftxui::Color::Blue),
-				ftxui::separator(),
-				component->Render() | ftxui::xflex,
-				ftxui::separator()
-			});
-		}) | ftxui::xflex;
-	};
+			{"640", {"(default)", "fixc", "optcell_vtst_wannier90", "shmem", "vtst"}},
+			{"631", {"shmem"}}
+		};
+		std::vector<std::string> vasp_version_entries_level3 = {"std", "gam", "ncl"};
 
-	// 各种显示在界面上的选项
-	int vasp_version_selected = 0;
-	std::vector<std::string> vasp_version_entries =
+		int queue_selected = 0;
+		std::vector<std::string> queue_entries =
+		{
+			"normal_1day", "normal_1week", "normal",
+			"normal_1day_new", "ocean_530_1day", "ocean6226R_1day"
+		};
+		std::map<std::string, std::size_t> max_cores =
+		{
+			{"normal_1day", 28}, {"normal_1week", 28}, {"normal", 20},
+			{"normal_1day_new", 24}, {"ocean_530_1day", 24}, {"ocean6226R_1day", 32}
+		};
+		std::string ncores = "";
+		std::string bsub = "";
+		std::string user_command = "";
+	} state;
+
+	// 构建界面, 需要至少 25 行 49 列
+	auto screen = ftxui::ScreenInteractive::FixedSize(30, 30);
+	auto request_interface = [&]
 	{
-		"640", "640_fixc", "640_optcell_vtst_wannier90", "640_shmem", "640_vtst",
-		"631_shmem"
-	};
-	int vasp_variant_selected = 0;
-	std::vector<std::string> vasp_variant_entries = {"std", "gam", "ncl"};
-	int queue_selected = 0;
-	std::vector<std::string> queue_entries =
-	{
-		"normal_1day", "normal_1week", "normal",
-		"normal_1day_new", "ocean_530_1day", "ocean6226R_1day"
-	};
-	std::string ncores = "";
-
-	// 当 ncores 为空字符串时，使用默认的核数
-	std::map<std::string, std::size_t> max_cores =
-	{
-		{"normal_1day", 28}, {"normal_1week", 28}, {"normal", 20},
-		{"normal_1day_new", 24}, {"ocean_530_1day", 24}, {"ocean6226R_1day", 32}
-	};
-
-	// 最终提交任务的命令
-	std::string bsub = "";
-
-	// 界面上的按钮对应的行为
-	std::string user_command = "";
-
-	// 构建界面(不带边框)
-	// 因为需要增加下划线，先构建 input
-	auto screen = ftxui::ScreenInteractive::Fullscreen();
-	auto ncores_input = ftxui::Input(&ncores, "(leave blank to use all cores)");
+		auto ncores_input = ftxui::Input(&ncores, "(leave blank to use all cores)");
+	}();
+	
 	auto request_interface = ftxui::Container::Vertical
 	({
 		wrap("Select vasp version:",

@@ -18,5 +18,3 @@ mkdir -p lib
 for i in ${used_libs[@]}; do
 	cp --dereference $i lib/
 done
-# patchelf --set-interpreter '$ORIGIN/lib/libc.so' chn_bsub
-# patchelf --set-rpath '$ORIGIN/lib' chn_bsub
