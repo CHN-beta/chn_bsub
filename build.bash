@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 used_libs=(
-	/usr/lib/libftxui-component.so.3.0.0
-	/usr/lib/libftxui-screen.so.3.0.0
-	/usr/lib/libftxui-dom.so.3.0.0
+	/usr/lib/libftxui-component.so.4.0.0
+	/usr/lib/libftxui-screen.so.4.0.0
+	/usr/lib/libftxui-dom.so.4.0.0
 	/usr/lib/libfmt.so.9
 	/usr/lib/libc.so
 	/usr/lib/libboost_filesystem.so.1.82.0

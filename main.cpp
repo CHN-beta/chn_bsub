@@ -175,7 +175,7 @@ int main()
 			})
 		}) | ftxui::borderHeavy
 			| ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 47)
-			| ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 25);
+			| ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 10);
 	}();
 
 	// 实际投递任务
