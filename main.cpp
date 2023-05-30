@@ -172,10 +172,17 @@ int main()
 					[&]{state.user_command = "quit"; screen.ExitLoopClosure()();}),
 				ftxui::Button("Back",
 					[&]{state.user_command = "back"; screen.ExitLoopClosure()();})
-			})
+			}),
+			ftxui::Renderer([]{return ftxui::vbox
+			({
+				ftxui::separator(),
+				ftxui::text("Source code:"),
+				ftxui::text("https://github.com/CHN-beta/chn_bsub.git"),
+				ftxui::text("Star & PR are welcome!"),
+			});})
 		}) | ftxui::borderHeavy
 			| ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 47)
-			| ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 10);
+			| ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 14);
 	}();
 
 	// 实际投递任务
